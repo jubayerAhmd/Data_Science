@@ -1,59 +1,29 @@
 # ======= INSTALL PACKAGES =======
-install.packages("dplyr")
-install.packages("tidytext")
-install.packages("tm")
 install.packages("corrplot")
-install.packages("tidyr")
-install.packages("ggplot2")
-install.packages("dbscan")
-install.packages("factoextra")
-install.packages("qdapDictionaries")
-install.packages("textclean")
-install.packages("stringr")
-install.packages("tokenizers")
-install.packages("hunspell")
-install.packages("stopwords")
-install.packages("textstem")
-install.packages("stringi")
-install.packages("knitr")
-install.packages("Matrix")
-install.packages("irlba")
 install.packages("e1071")
+install.packages("dplyr")
+install.packages("ggplot2")
+
 
 # ===== LIBRARIES =====
-library(e1071)
 library(corrplot)
+library(e1071)
 library(dplyr)
-library(tidytext)
-library(tm)
-library(tidyr)
 library(ggplot2)
-library(dbscan)
-library(factoextra)
-library(qdapDictionaries)
-library(textclean)
-library(stringr)
-library(tokenizers)
-library(hunspell)
-library(stopwords)
-library(textstem)
-library(stringi)
-library(parallel)
-library(knitr)
-library(Matrix)
-library(irlba)
 
 cat("All packages loaded successfully!\n")
 
 
 #-------------------- Load Dataset -----------------------
 
-mydata <- read.csv("F:/semester-12/INTRODUCTION TO DATA SCIENCE/Project/My_Project_Mid/pdataset.csv")
+# mydata <- read.csv("F:/semester-12/INTRODUCTION TO DATA SCIENCE/Project/My_Project_Mid/pdataset.csv")
+
+mydata <- read.csv("https://drive.google.com/uc?export=download&id=15qCdIx9dZ--Kq0kO0NgEYywR77T-oGjb")
 
 mydata <- mydata[1:1000, ]    
 
 
-# ------------------- Display the first few rows of the Dataset --------------------
+# ------------------- Display the first 20 rows of the Dataset --------------------
 head(mydata, 20)
 
 # ------------------- Show shape (rows × columns) --------------------
@@ -72,11 +42,11 @@ sapply(mydata, class)
 
 # summary(mydata)
 
-get_mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
 
+get_mode <- function(x) {
+    ux <- unique(x)
+    ux[which.max(tabulate(match(x, ux)))]
+}
 
 statistics <- data.frame(
   Mean   = sapply(mydata, mean, na.rm = TRUE),
@@ -90,7 +60,7 @@ statistics <- data.frame(
 
 statistics
 
-# ------------------- Identify categorical and numerical features --------------------
+# ------------------- Identify numerical and categorical features --------------------
 
 numeric_features <- names(mydata)[sapply(mydata, is.numeric)]
 numeric_features
@@ -111,8 +81,10 @@ list(
 #--------------------------------------------------------------------------
 
 # ------------------- Univariate Analysis --------------------
-par(mar = c(4, 4, 2, 1))
 
+par(mar = c(4, 4, 2, 1)) # plotting system: par(mar = c(bottom, left, top, right))
+
+# Histogram
 for (col in numeric_features) {
   hist(mydata[[col]], 
        main=paste("Histogram of", col),
@@ -121,7 +93,7 @@ for (col in numeric_features) {
        border="black")
 }
 
-
+# Box Plot
 for (col in numeric_features) {
   boxplot(mydata[[col]],
           main=paste("Boxplot of", col),
@@ -129,7 +101,7 @@ for (col in numeric_features) {
           vertical=TRUE)
 }
 
-
+# Bar Chart
 for (col in categorical_features) {
   barplot(table(mydata[[col]]),
           main=paste("Bar Plot of", col),
@@ -139,21 +111,22 @@ for (col in categorical_features) {
 
 # ------------------- Bivariate Analysis --------------------
 
+# Correlation matrix (Heat Map)
 cor_matrix <- cor(mydata[, numeric_features], use="complete.obs")
 corrplot(cor_matrix, method="color", type="lower")
 
-
+# Scatter plots for numeric pairs
 pairs(mydata[, numeric_features], main="Scatter Plot Matrix")
 
 
 
 # ------------------- Identify patterns: skewness, and possible outliers --------------------
 
-
+# Skewness
 skew_values <- sapply(mydata[, numeric_features], skewness)
 skew_values
 
-
+# Possible Outliers
 outlier_summary <- data.frame()
 
 for (col in numeric_features) {
@@ -165,9 +138,7 @@ for (col in numeric_features) {
   upper_bound <- Q3 + 1.5 * IQR_val
   
   outliers <- sum(mydata[[col]] < lower_bound | mydata[[col]] > upper_bound)
-  
-  outlier_summary <- rbind(outlier_summary,
-                           data.frame(Feature=col, Outliers=outliers))
+  outlier_summary <- rbind(outlier_summary,data.frame(Feature=col, Outliers=outliers))
 }
 
 outlier_summary
